@@ -8,10 +8,6 @@ import java.util.TreeMap;
 
 public class InitCommand  {
 public static void  init() {
-    if(Path.GITLET_DIR.exists()){
-        throw new GitletException("A Gitlet version-control system already exists in the current directory.");
-    }
-
     Path.COMMIT_DIR.mkdirs();
     Path.Branch_DIR.mkdirs();
     Path.BLOB_DIR.mkdirs();
@@ -26,5 +22,8 @@ public static void  init() {
     // head -> master
     Branch.writeHead("master");
 
+}
+public static boolean isInitialized(){
+    return Path.GITLET_DIR.exists();
 }
 }
