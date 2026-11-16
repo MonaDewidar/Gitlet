@@ -35,7 +35,7 @@ public class Utils {
 
     /** Returns the SHA-1 hash of the concatenation of VALS, which may
      *  be any mixture of byte arrays and Strings. */
-    static String sha1(Object... vals) {
+   public  static String sha1(Object... vals) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-1");
             for (Object val : vals) {
@@ -69,7 +69,7 @@ public class Utils {
      *  if FILE was deleted, and false otherwise.  Refuses to delete FILE
      *  and throws IllegalArgumentException unless the directory designated by
      *  FILE also contains a directory named .gitlet. */
-    static boolean restrictedDelete(File file) {
+   public static boolean restrictedDelete(File file) {
         if (!(new File(file.getParentFile(), ".gitlet")).isDirectory()) {
             throw new IllegalArgumentException("not .gitlet working directory");
         }
@@ -93,7 +93,7 @@ public class Utils {
     /** Return the entire contents of FILE as a byte array.  FILE must
      *  be a normal file.  Throws IllegalArgumentException
      *  in case of problems. */
-    static byte[] readContents(File file) {
+    public static byte[] readContents(File file) {
         if (!file.isFile()) {
             throw new IllegalArgumentException("must be a normal file");
         }
@@ -138,7 +138,7 @@ public class Utils {
 
     /** Return an object of type T read from FILE, casting it to EXPECTEDCLASS.
      *  Throws IllegalArgumentException in case of problems. */
-    static <T extends Serializable> T readObject(File file,
+    public static <T extends Serializable> T readObject(File file,
                                                  Class<T> expectedClass) {
         try {
             ObjectInputStream in =
@@ -153,7 +153,7 @@ public class Utils {
     }
 
     /** Write OBJ to FILE. */
-    static void writeObject(File file, Serializable obj) {
+    public static void writeObject(File file, Serializable obj) {
         writeContents(file, serialize(obj));
     }
 
@@ -171,7 +171,7 @@ public class Utils {
     /** Returns a list of the names of all plain files in the directory DIR, in
      *  lexicographic order as Java Strings.  Returns null if DIR does
      *  not denote a directory. */
-    static List<String> plainFilenamesIn(File dir) {
+    public static List<String> plainFilenamesIn(File dir) {
         String[] files = dir.list(PLAIN_FILES);
         if (files == null) {
             return null;
@@ -208,7 +208,7 @@ public class Utils {
     /* SERIALIZATION UTILITIES */
 
     /** Returns a byte array containing the serialized contents of OBJ. */
-    static byte[] serialize(Serializable obj) {
+    public static byte[] serialize(Serializable obj) {
         try {
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             ObjectOutputStream objectStream = new ObjectOutputStream(stream);
