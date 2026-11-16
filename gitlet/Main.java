@@ -1,4 +1,5 @@
 package gitlet;
+import gitlet.services.AddCommand;
 import gitlet.services.InitCommand;
 
 public class Main {
@@ -16,6 +17,15 @@ public class Main {
                         throw new GitletException("Incorrect operands.");
                     }
                     InitCommand.init();
+                    break;
+                case "add":
+                    if(!InitCommand.isInitialized()){
+                        throw new GitletException("Not in an initialized Gitlet directory.");
+                    }
+                    if(args.length>2){
+                        throw new GitletException("Incorrect operands.");
+                    }
+                    AddCommand.addingFunction(args[1]);
                     break;
 
 

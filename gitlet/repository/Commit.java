@@ -89,7 +89,6 @@ public class Commit implements Serializable {
 
     public static List<String> listCommit(){
         List<String> all=new ArrayList<>();
-        all=Utils.plainFilenamesIn(Path.COMMIT_DIR);
-        return all;
+        return Utils.plainFilenamesIn(Path.COMMIT_DIR);
     }
 }

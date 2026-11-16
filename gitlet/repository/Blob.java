@@ -8,10 +8,11 @@ import java.io.Serializable;
 
 public class Blob implements Serializable {
 //save content and get its id, read content by id
-   public void saveContent(String content){
+   public static String saveContent(String content){
        String id=Utils.sha1((Object) Utils.serialize(content));
        File file= Utils.join(Path.BLOB_DIR,id);
-       Utils.writeContents(file,id);
+       Utils.writeContents(file,content);
+       return id;
    }
 
    public String readContent(String id){
