@@ -15,7 +15,7 @@ public class Blob implements Serializable {
        return id;
    }
 
-   public String readContent(String id){
+   public static String readContent(String id){
        File file=Utils.join(Path.BLOB_DIR,id);
        if(!(file.exists())){
            throw new GitletException("There isn't any blob with this id");

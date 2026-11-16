@@ -28,6 +28,5 @@ public class AddCommand {
 
         stagingArea.saveStagingContent();
 
-
     }
 }
