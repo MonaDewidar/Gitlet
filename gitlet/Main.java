@@ -54,6 +54,14 @@ public class Main {
                     }
                     LogCommand.logCommand();
                     break;
+
+                case "global-log":
+                    if(args.length!=1){
+                        throw new GitletException("Incorrect operands.");
+                    }
+                    LogCommand.globalLogCommand();
+                    break;
+
                 default:
                     throw new GitletException("No command with that name exists.");
             }
