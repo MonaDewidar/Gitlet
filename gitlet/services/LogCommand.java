@@ -1,5 +1,6 @@
 package gitlet.services;
 
+import gitlet.GitletException;
 import gitlet.Utils;
 import gitlet.repository.Branch;
 import gitlet.repository.Commit;
@@ -29,5 +30,20 @@ public class LogCommand {
             Commit commit=Commit.loadCommit(id);
             System.out.println(commit.toLogString(id));
         }
+    }
+
+
+    public static void findCommand(String message){
+        List<String>allCommitId=Commit.listCommit();
+        boolean find=false;
+        for(String id:allCommitId){
+            Commit commit=Commit.loadCommit(id);
+            if(commit.getMessage().equals(message)){
+                find=true;
+                System.out.println(id);
+            }
+        }
+        if(!find)
+            throw new GitletException("Found no commit with that message.");
     }
 }
