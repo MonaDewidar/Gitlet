@@ -1,8 +1,5 @@
 package gitlet;
-import gitlet.services.AddCommand;
-import gitlet.services.CommitCommand;
-import gitlet.services.InitCommand;
-import gitlet.services.RmCommand;
+import gitlet.services.*;
 
 public class Main {
 
@@ -49,6 +46,13 @@ public class Main {
                         throw new GitletException("Incorrect operands.");
                     }
                     RmCommand.removeCommand(args[1]);
+                    break;
+
+                case "log":
+                    if(args.length!=1){
+                        throw new GitletException("Incorrect operands.");
+                    }
+                    LogCommand.logCommand();
                     break;
                 default:
                     throw new GitletException("No command with that name exists.");

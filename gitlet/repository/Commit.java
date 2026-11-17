@@ -5,10 +5,8 @@ import gitlet.Utils;
 
 import java.io.File;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.TreeMap;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 import static gitlet.Utils.sha1;
 import static java.lang.System.exit;
@@ -74,6 +72,21 @@ public class Commit implements Serializable {
                 ", blobs=" + blobs +
                 '}';
     }
+
+    // the text for one commit in the log
+    public  String toLogString(String id) {
+        SimpleDateFormat format = new SimpleDateFormat("EEE MMM d HH:mm:ss yyyy Z", Locale.ENGLISH);
+        String result = "===\n";
+        result += "commit " + id + "\n";
+        if (secParent != null) {
+            // only for merge commits: first 7 characters of each parent
+            result += "Merge: " + parent.substring(0, 7) + " " + secParent.substring(0, 7) + "\n";
+        }
+        result += "Date: " + format.format(TimeStamp) + "\n";
+        result += message + "\n";
+        return result;
+    }
+
 
     // load
     public static Commit loadCommit(String id){

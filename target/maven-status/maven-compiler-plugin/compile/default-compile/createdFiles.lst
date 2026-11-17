@@ -5,6 +5,7 @@ gitlet\GitletException.class
 gitlet\Main.class
 gitlet\repository\Blob.class
 gitlet\repository\Branch.class
+gitlet\services\LogCommand.class
 gitlet\services\CommitCommand.class
 gitlet\services\RmCommand.class
 test\InitTestCommand.class
