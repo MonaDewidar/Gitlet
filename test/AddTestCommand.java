@@ -5,7 +5,6 @@ import gitlet.Utils;
 import gitlet.repository.Blob;
 import gitlet.repository.Path;
 import gitlet.repository.StagingArea;
-import gitlet.repository.WorkingDirectory;
 import gitlet.services.AddCommand;
 import gitlet.services.InitCommand;
 import org.junit.Before;

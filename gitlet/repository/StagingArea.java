@@ -51,7 +51,6 @@ public class StagingArea implements Serializable {
 
 
 
-
     // save
     public  void saveStagingContent(){
         Utils.writeObject(Path.STAGING_FILE,this);

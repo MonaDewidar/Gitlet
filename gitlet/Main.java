@@ -1,5 +1,6 @@
 package gitlet;
 import gitlet.services.AddCommand;
+import gitlet.services.CommitCommand;
 import gitlet.services.InitCommand;
 
 public class Main {
@@ -26,6 +27,17 @@ public class Main {
                         throw new GitletException("Incorrect operands.");
                     }
                     AddCommand.addingFunction(args[1]);
+                    break;
+
+                case "commit":
+                    if(!InitCommand.isInitialized()){
+                        throw new GitletException("Not in an initialized Gitlet directory.");
+                    }
+                    if(args.length==1){
+                        // message empty
+                            throw new GitletException("Please enter a commit message.");
+                    }
+                    CommitCommand.addCommit(args[1]);
                     break;
 
 

@@ -20,7 +20,7 @@ public class InitTestCommand {
         deleteFolder(Path.GITLET_DIR);
     }
 
-/// folder.delete() only delete the folder if it is empty
+// folder.delete() only delete the folder if it is empty
     void deleteFolder(File folder){
         File[] in=folder.listFiles();
         if(in !=null){

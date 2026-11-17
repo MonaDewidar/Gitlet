@@ -1,10 +1,13 @@
 D:\Demo\proj2\gitlet\repository\Commit.java
+D:\Demo\proj2\test\AddTestCommand.java
 D:\Demo\proj2\gitlet\repository\Blob.java
+D:\Demo\proj2\gitlet\services\AddCommand.java
 D:\Demo\proj2\gitlet\GitletException.java
 D:\Demo\proj2\gitlet\Dumpable.java
 D:\Demo\proj2\gitlet\repository\Branch.java
 D:\Demo\proj2\gitlet\repository\StagingArea.java
 D:\Demo\proj2\gitlet\Utils.java
+D:\Demo\proj2\gitlet\services\CommitCommand.java
 D:\Demo\proj2\gitlet\Main.java
 D:\Demo\proj2\gitlet\repository\WorkingDirectory.java
 D:\Demo\proj2\gitlet\services\InitCommand.java
