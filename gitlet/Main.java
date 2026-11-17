@@ -2,6 +2,7 @@ package gitlet;
 import gitlet.services.AddCommand;
 import gitlet.services.CommitCommand;
 import gitlet.services.InitCommand;
+import gitlet.services.RmCommand;
 
 public class Main {
 
@@ -33,14 +34,22 @@ public class Main {
                     if(!InitCommand.isInitialized()){
                         throw new GitletException("Not in an initialized Gitlet directory.");
                     }
-                    if(args.length==1){
+                    if(args.length!=2){
                         // message empty
                             throw new GitletException("Please enter a commit message.");
                     }
                     CommitCommand.addCommit(args[1]);
                     break;
 
-
+                case "rm":
+                    if(!InitCommand.isInitialized()){
+                        throw new GitletException("Not in an initialized Gitlet directory.");
+                    }
+                    if(args.length!=2){
+                        throw new GitletException("Incorrect operands.");
+                    }
+                    RmCommand.removeCommand(args[1]);
+                    break;
                 default:
                     throw new GitletException("No command with that name exists.");
             }

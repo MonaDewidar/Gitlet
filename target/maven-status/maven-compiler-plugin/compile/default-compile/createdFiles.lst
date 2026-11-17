@@ -6,6 +6,7 @@ gitlet\Main.class
 gitlet\repository\Blob.class
 gitlet\repository\Branch.class
 gitlet\services\CommitCommand.class
+gitlet\services\RmCommand.class
 test\InitTestCommand.class
 gitlet\services\InitCommand.class
 gitlet\services\AddCommand.class
