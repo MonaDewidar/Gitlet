@@ -22,7 +22,16 @@ public class CheckoutCommand {
         }
     }
 
-    public static void checkoutFileWithSpecificCommitId(String commitId,String fileName){
+    public static void checkoutFileWithSpecificCommitId(String commitIdAp,String fileName){
+        String commitId=commitIdAp;
+        List<String>commits=Commit.listCommit();
+        for(String id:commits){
+            if(id.startsWith(commitIdAp)){
+                commitId=id;
+                break;
+            }
+        }
+
         Commit commit=Commit.loadCommit(commitId);
         if (commit.getBlobs().containsKey(fileName)) {
             // read the content of this file

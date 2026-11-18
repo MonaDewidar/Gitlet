@@ -113,6 +113,16 @@ public class Main {
                     }
                     BranchCommand.branchDeleting(args[1]);
                     break;
+
+                case "reset":
+                    if(!InitCommand.isInitialized()){
+                        throw new GitletException("Not in an initialized Gitlet directory.");
+                    }
+                    if(args.length!=2){
+                        throw new GitletException("Incorrect operands.");
+                    }
+                    ResetCommand.restCommand(args[1]);
+                    break;
                 default:
                     throw new GitletException("No command with that name exists.");
             }
