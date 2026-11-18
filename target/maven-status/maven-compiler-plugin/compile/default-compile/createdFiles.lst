@@ -2,6 +2,7 @@ gitlet\repository\Commit.class
 gitlet\repository\Path.class
 gitlet\Utils$1.class
 gitlet\GitletException.class
+gitlet\services\CheckoutCommand.class
 gitlet\Main.class
 gitlet\repository\Blob.class
 gitlet\repository\Branch.class

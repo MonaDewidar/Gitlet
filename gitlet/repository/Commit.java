@@ -93,7 +93,7 @@ public class Commit implements Serializable {
         // get the commitFile with this id
         File file=Utils.join(Path.COMMIT_DIR,id);
         if(!(file.exists())) {
-            throw new GitletException("There isn't any commit with this id");
+            throw new GitletException("No commit with that id exists.");
         }
         return Utils.readObject(file,Commit.class);
     }
