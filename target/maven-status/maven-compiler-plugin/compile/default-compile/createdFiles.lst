@@ -12,6 +12,7 @@ gitlet\services\RmCommand.class
 test\InitTestCommand.class
 gitlet\services\InitCommand.class
 gitlet\services\AddCommand.class
+gitlet\services\BranchCommand.class
 gitlet\repository\StagingArea.class
 gitlet\Utils.class
 gitlet\repository\WorkingDirectory.class

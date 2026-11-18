@@ -99,6 +99,13 @@ public class Main {
                         throw new GitletException("Incorrect operands.");
                     }
                     break;
+
+                case "branch":
+                    if(args.length!=2){
+                        throw new GitletException("Incorrect operands.");
+                    }
+                    BranchCommand.branchCommand(args[1]);
+                    break;
                 default:
                     throw new GitletException("No command with that name exists.");
             }
