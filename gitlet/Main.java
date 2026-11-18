@@ -68,6 +68,13 @@ public class Main {
                     }
                     LogCommand.findCommand(args[1]);
                     break;
+
+                case "status":
+                    if(args.length!=1){
+                        throw new GitletException("Incorrect operands.");
+                    }
+                    LogCommand.statusCommand();
+                    break;
                 default:
                     throw new GitletException("No command with that name exists.");
             }
