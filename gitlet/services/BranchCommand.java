@@ -14,4 +14,16 @@ public class BranchCommand {
         Branch.writeBranch(branchName,commitId);
 
     }
+
+    public static void branchDeleting(String branchName){
+        String currentBranch=Branch.readHead();
+        if(currentBranch.equals(branchName)){
+            throw new GitletException("Cannot remove the current branch.");
+        }
+        if(!(Utils.join(Path.Branch_DIR,branchName).exists())){
+            throw new GitletException("A branch with that name does not exist.");
+        }
+        Utils.join(Path.Branch_DIR,branchName).delete();
+
+    }
 }
