@@ -3,6 +3,7 @@ gitlet\Utils$1.class
 gitlet\repository\Blob.class
 gitlet\services\LogCommand.class
 gitlet\services\RmCommand.class
+gitlet\services\MergeCommand.class
 gitlet\services\InitCommand.class
 gitlet\services\AddCommand.class
 gitlet\repository\StagingArea.class

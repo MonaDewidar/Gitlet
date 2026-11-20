@@ -123,6 +123,16 @@ public class Main {
                     }
                     ResetCommand.restCommand(args[1]);
                     break;
+
+                case "merge":
+                    if(!InitCommand.isInitialized()){
+                        throw new GitletException("Not in an initialized Gitlet directory.");
+                    }
+                    if(args.length!=2){
+                        throw new GitletException("Incorrect operands.");
+                    }
+                    MergeCommand.mergeCommand(args[1]);
+                    break;
                 default:
                     throw new GitletException("No command with that name exists.");
             }
