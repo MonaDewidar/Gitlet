@@ -7,9 +7,11 @@ D:\Demo\proj2\gitlet\services\LogCommand.java
 D:\Demo\proj2\gitlet\repository\Branch.java
 D:\Demo\proj2\gitlet\Utils.java
 D:\Demo\proj2\gitlet\Main.java
+D:\Demo\proj2\gitlet\services\MergeCommand.java
 D:\Demo\proj2\gitlet\repository\WorkingDirectory.java
 D:\Demo\proj2\test\InitTestCommand.java
 D:\Demo\proj2\gitlet\DumpObj.java
+D:\Demo\proj2\MergeTestCommand.java
 D:\Demo\proj2\gitlet\repository\Commit.java
 D:\Demo\proj2\test\AddTestCommand.java
 D:\Demo\proj2\test\ResetTestCommand.java
