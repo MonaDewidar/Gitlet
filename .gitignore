@@ -1,10 +1,5 @@
-# gitlet repository created when the JUnit tests run in this folder
+# Gitlet data created when the program or the JUnit tests run in this folder
 .gitlet/
-
-# build output
-target/
-*.class
-gitlet/sentinel
 
 # files created by the JUnit tests
 /a.txt
@@ -13,6 +8,16 @@ gitlet/sentinel
 /theirs.txt
 /shared.txt
 
+# build output
+target/
+out/
+*.class
+gitlet/sentinel
+
 # integration tester output
 testing/*.dir/
 testing/__pycache__/
+
+# IDE settings
+.idea/
+*.iml
