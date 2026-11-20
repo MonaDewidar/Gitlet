@@ -1,0 +1,61 @@
+# Every case of "Modifications Not Staged For Commit" and "Untracked Files".
+I definitions.inc
+> init
+<<<
++ a.txt wug.txt
++ b.txt wug.txt
++ c.txt wug.txt
++ d.txt wug.txt
+> add a.txt
+<<<
+> add b.txt
+<<<
+> add c.txt
+<<<
+> add d.txt
+<<<
+> commit "four files"
+<<<
+# tracked, changed, not staged
++ a.txt notwug.txt
+# tracked, deleted, not staged for removal
+- b.txt
+# staged for removal, then created again -> untracked
+> rm c.txt
+<<<
+* c.txt
++ c.txt wug.txt
+# staged for addition, then changed
++ e.txt wug.txt
+> add e.txt
+<<<
++ e.txt notwug.txt
+# staged for addition, then deleted
++ f.txt wug.txt
+> add f.txt
+<<<
+- f.txt
+# never added
++ g.txt wug.txt
+> status
+=== Branches ===
+\*master
+
+=== Staged Files ===
+e.txt
+f.txt
+
+=== Removed Files ===
+c.txt
+
+=== Modifications Not Staged For Commit ===
+a.txt \(modified\)
+b.txt \(deleted\)
+e.txt \(modified\)
+f.txt \(deleted\)
+
+=== Untracked Files ===
+c.txt
+g.txt
+
+<<<*

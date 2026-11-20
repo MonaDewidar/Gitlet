@@ -2,14 +2,12 @@ package gitlet.services;
 
 import gitlet.repository.*;
 
-import java.util.List;
-
 public class AddCommand {
     public static void addingFunction(String fileName ){
         // get file content
-        String content= WorkingDirectory.readFilesInWD(fileName);
+        byte[] content= WorkingDirectory.readFilesInWD(fileName);
         // get id_blob
-        String blobId=Blob.saveContent(content);
+        String blobId=Blob.idOf(content);
         // good point
         StagingArea stagingArea=StagingArea.loadStagingContent();
 
@@ -19,10 +17,11 @@ public class AddCommand {
         Commit current=Commit.loadCommit(commitId);
         String currentCommitBlobId=current.getBlobs().get(fileName);
         if(blobId.equals(currentCommitBlobId)){
-            // no change
+            // no change -> not staged for addition and not staged for removal anymore
             stagingArea.unstage(fileName);
         }
         else {
+            Blob.saveContent(content);
             stagingArea.addingFiles(fileName,blobId);
         }
 

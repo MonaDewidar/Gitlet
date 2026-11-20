@@ -1,4 +1,4 @@
-
+package test;
 
 import gitlet.Utils;
 import gitlet.repository.Blob;

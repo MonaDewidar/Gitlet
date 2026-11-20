@@ -1,0 +1,61 @@
+# Conflicts: changed differently on both sides, and changed on one side but deleted on the other.
+I definitions.inc
+> init
+<<<
++ f.txt wug.txt
++ g.txt wug.txt
+> add f.txt
+<<<
+> add g.txt
+<<<
+> commit "Two files"
+<<<
+> branch other
+<<<
++ f.txt notwug.txt
+> add f.txt
+<<<
+> rm g.txt
+<<<
+> commit "master changes f, removes g"
+<<<
+> checkout other
+<<<
++ f.txt wug2.txt
++ g.txt notwug.txt
+> add f.txt
+<<<
+> add g.txt
+<<<
+> commit "other changes f and g"
+<<<
+> checkout master
+<<<
+> merge other
+Encountered a merge conflict.
+<<<
+= f.txt conflict-notwug-wug2.txt
+= g.txt conflict-deleted-notwug.txt
+> log
+===
+commit [a-f0-9]+
+Merge: [a-f0-9]{7} [a-f0-9]{7}
+${DATE}
+Merged other into master.
+
+${ARBLINES}
+<<<*
+> status
+=== Branches ===
+\*master
+other
+
+=== Staged Files ===
+
+=== Removed Files ===
+
+=== Modifications Not Staged For Commit ===
+
+=== Untracked Files ===
+
+<<<*

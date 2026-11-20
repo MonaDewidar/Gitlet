@@ -49,7 +49,6 @@ public class ResetTestCommand {
 
     @Test
     public void  resettingToAnOlderCommitRestoresItsFilesAndRemovesNewerOnes(){
-        InitCommand.init();
         Utils.writeContents(Utils.join(Path.CWD,"a.txt"),"version1");
         AddCommand.addingFunction("a.txt");
         CommitCommand.addCommit("first");
@@ -73,7 +72,6 @@ public class ResetTestCommand {
 
     @Test
     public void resetMovesTheCurrentBranchHeadNotStagingAreaCleared(){
-        InitCommand.init();
         Utils.writeContents(Utils.join(Path.CWD,"a.txt"),"version1");
         AddCommand.addingFunction("a.txt");
         CommitCommand.addCommit("first");
@@ -95,7 +93,6 @@ public class ResetTestCommand {
 
     @Test
     public void untrackedFilesThatWillBeOverwrittenStopTheCommand(){
-        InitCommand.init();
         Utils.writeContents(Utils.join(Path.CWD,"a.txt"),"version1");
         AddCommand.addingFunction("a.txt");
         CommitCommand.addCommit("first");

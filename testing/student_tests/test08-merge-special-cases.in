@@ -1,0 +1,61 @@
+# Uncommitted changes, given branch is an ancestor, fast-forward, untracked file in the way.
+I definitions.inc
+> init
+<<<
++ f.txt wug.txt
+> add f.txt
+<<<
+> commit "f"
+<<<
+> branch other
+<<<
++ g.txt wug2.txt
+> add g.txt
+<<<
+> commit "g on master"
+<<<
++ h.txt wug3.txt
+> add h.txt
+<<<
+> merge other
+You have uncommitted changes.
+<<<
+> rm h.txt
+<<<
+> merge other
+Given branch is an ancestor of the current branch.
+<<<
+> checkout other
+<<<
+* g.txt
+> merge master
+Current branch fast-forwarded.
+<<<
+= g.txt wug2.txt
+> branch side
+<<<
+> checkout side
+<<<
++ k.txt wug2.txt
+> add k.txt
+<<<
+> commit "k on side"
+<<<
+> checkout master
+<<<
+* k.txt
++ h.txt wug3.txt
+> add h.txt
+<<<
+> commit "h on master"
+<<<
++ k.txt notwug.txt
+> merge side
+There is an untracked file in the way; delete it, or add and commit it first.
+<<<
+= k.txt notwug.txt
+= h.txt wug3.txt
+- k.txt
+> merge side
+<<<
+= k.txt wug2.txt

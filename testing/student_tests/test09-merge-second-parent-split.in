@@ -1,0 +1,43 @@
+# The split point can be reached only through the second parent of an earlier merge commit.
+# With the right split point (C3) h.txt was changed only on B, so there is no conflict.
+I definitions.inc
+> init
+<<<
++ f.txt wug.txt
+> add f.txt
+<<<
+> commit "C1"
+<<<
+> branch B
+<<<
++ g.txt wug2.txt
+> add g.txt
+<<<
+> commit "C2"
+<<<
+> checkout B
+<<<
++ h.txt wug3.txt
+> add h.txt
+<<<
+> commit "C3"
+<<<
+> checkout master
+<<<
+> merge B
+<<<
+= h.txt wug3.txt
+> checkout B
+<<<
++ h.txt wug.txt
+> add h.txt
+<<<
+> commit "C4"
+<<<
+> checkout master
+<<<
+> merge B
+<<<
+= f.txt wug.txt
+= g.txt wug2.txt
+= h.txt wug.txt

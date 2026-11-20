@@ -1,51 +1,18 @@
 package gitlet.services;
 
-import gitlet.GitletException;
 import gitlet.repository.Branch;
 import gitlet.repository.Commit;
-import gitlet.repository.StagingArea;
-import gitlet.repository.WorkingDirectory;
-
-import java.util.List;
-import java.util.TreeMap;
 
 public class ResetCommand {
     public static void restCommand(String commitIdAp){
-        String commitId=commitIdAp;
-        List<String>commits=Commit.listCommit();
-        for(String id:commits){
-            if(id.startsWith(commitIdAp)){
-                commitId=id;
-                break;
-            }
-        }
-        Commit commit=Commit.loadCommit(commitId);
-        TreeMap<String,String>blobs=commit.getBlobs();
-        StagingArea stagingArea=StagingArea.loadStagingContent();
-        TreeMap<String,String>currentBlobs=Commit.loadCommit(Branch.readBranch(Branch.readHead())).getBlobs();
+        // works with the full id or an abbreviated one
+        String commitId=Commit.findFullId(commitIdAp);
 
-        List<String>WDFiles=WorkingDirectory.loadFilesInWD();
-        for(String file:WDFiles){
-            boolean tracked=currentBlobs.containsKey(file);
-            if(!tracked && blobs.containsKey(file)){
-                throw new GitletException("There is an untracked file in the way; delete it, or add and commit it first.");
-            }
-        }
+        // checkout all files of this commit, remove the tracked files that are not in it,
+        // and clear the staging area
+        CheckoutCommand.checkoutCommit(commitId);
 
-        for(String fileName:currentBlobs.keySet()){
-            if(!(blobs.containsKey(fileName))){
-                WorkingDirectory.deleteFilesFromWD(fileName);
-            }
-        }
-
-        for(String fileName:blobs.keySet()){
-            CheckoutCommand.checkoutFileWithSpecificCommitId(commitId,fileName);
-        }
-
+        // move the current branch head to this commit
         Branch.writeBranch(Branch.readHead(),commitId);
-        stagingArea.clear();
-        stagingArea.saveStagingContent();
-
-
     }
 }

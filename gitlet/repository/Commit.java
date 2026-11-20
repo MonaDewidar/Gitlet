@@ -9,10 +9,12 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static gitlet.Utils.sha1;
-import static java.lang.System.exit;
 
 public class Commit implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+    // length of a full sha1 id
+    private static final int ID_LENGTH = 40;
 
     private final String message;
     private final Date TimeStamp;
@@ -91,18 +93,43 @@ public class Commit implements Serializable {
     // load
     public static Commit loadCommit(String id){
         // get the commitFile with this id
+        if(id==null || id.isEmpty()){
+            throw new GitletException("No commit with that id exists.");
+        }
         File file=Utils.join(Path.COMMIT_DIR,id);
-        if(!(file.exists())) {
+        if(!(file.isFile())) {
             throw new GitletException("No commit with that id exists.");
         }
         return Utils.readObject(file,Commit.class);
+    }
+
+    // full id from a full or abbreviated id (less than 40 characters)
+    public static String findFullId(String idAp){
+        if(idAp==null || idAp.isEmpty() || idAp.length()>ID_LENGTH){
+            throw new GitletException("No commit with that id exists.");
+        }
+        if(idAp.length()==ID_LENGTH){
+            if(Utils.join(Path.COMMIT_DIR,idAp).isFile()){
+                return idAp;
+            }
+            throw new GitletException("No commit with that id exists.");
+        }
+        for(String id:listCommit()){
+            if(id.startsWith(idAp)){
+                return id;
+            }
+        }
+        throw new GitletException("No commit with that id exists.");
     }
 
 
     // list
 
     public static List<String> listCommit(){
-        List<String> all=new ArrayList<>();
-        return Utils.plainFilenamesIn(Path.COMMIT_DIR);
+        List<String> all=Utils.plainFilenamesIn(Path.COMMIT_DIR);
+        if(all==null){
+            return new ArrayList<>();
+        }
+        return all;
     }
 }

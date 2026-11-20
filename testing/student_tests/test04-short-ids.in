@@ -1,0 +1,60 @@
+# reset and checkout work with abbreviated commit ids.
+I definitions.inc
+> init
+<<<
++ f.txt wug.txt
+> add f.txt
+<<<
+> commit "v1"
+<<<
++ f.txt notwug.txt
++ g.txt wug.txt
+> add f.txt
+<<<
+> add g.txt
+<<<
+> commit "v2"
+<<<
+> find "v1"
+([a-f0-9]{7})[a-f0-9]{33}
+<<<*
+D V1 "${1}"
+> find "v2"
+([a-f0-9]{7})[a-f0-9]{33}
+<<<*
+D V2 "${1}"
+> reset ${V1}
+<<<
+= f.txt wug.txt
+* g.txt
+> log
+===
+${COMMIT_HEAD}
+v1
+
+===
+${COMMIT_HEAD}
+initial commit
+
+<<<*
+> checkout ${V2} -- f.txt
+<<<
+= f.txt notwug.txt
+> status
+=== Branches ===
+\*master
+
+=== Staged Files ===
+
+=== Removed Files ===
+
+=== Modifications Not Staged For Commit ===
+f.txt \(modified\)
+
+=== Untracked Files ===
+
+<<<*
+> reset ${V2}
+<<<
+= f.txt notwug.txt
+= g.txt wug.txt

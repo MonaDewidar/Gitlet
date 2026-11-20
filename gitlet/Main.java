@@ -12,80 +12,57 @@ public class Main {
             String command=args[0];
             switch (command) {
                 case "init":
-                    if (args.length > 1) {
-                        throw new GitletException("Incorrect operands.");
-                    }
+                    validateNumArgs(args,1);
                     InitCommand.init();
                     break;
                 case "add":
-                    if(!InitCommand.isInitialized()){
-                        throw new GitletException("Not in an initialized Gitlet directory.");
-                    }
-                    if(args.length!=2){
-                        throw new GitletException("Incorrect operands.");
-                    }
+                    checkInitialized();
+                    validateNumArgs(args,2);
                     AddCommand.addingFunction(args[1]);
                     break;
 
                 case "commit":
-                    if(!InitCommand.isInitialized()){
-                        throw new GitletException("Not in an initialized Gitlet directory.");
-                    }
-                    if(args.length!=2){
+                    checkInitialized();
+                    if(args.length==1){
                         // message empty
-                            throw new GitletException("Please enter a commit message.");
+                        throw new GitletException("Please enter a commit message.");
                     }
+                    validateNumArgs(args,2);
                     CommitCommand.addCommit(args[1]);
                     break;
 
                 case "rm":
-                    if(!InitCommand.isInitialized()){
-                        throw new GitletException("Not in an initialized Gitlet directory.");
-                    }
-                    if(args.length!=2){
-                        throw new GitletException("Incorrect operands.");
-                    }
+                    checkInitialized();
+                    validateNumArgs(args,2);
                     RmCommand.removeCommand(args[1]);
                     break;
 
                 case "log":
-                    if(args.length!=1){
-                        throw new GitletException("Incorrect operands.");
-                    }
+                    checkInitialized();
+                    validateNumArgs(args,1);
                     LogCommand.logCommand();
                     break;
 
                 case "global-log":
-                    if(args.length!=1){
-                        throw new GitletException("Incorrect operands.");
-                    }
+                    checkInitialized();
+                    validateNumArgs(args,1);
                     LogCommand.globalLogCommand();
                     break;
 
                 case "find":
-                    if(!InitCommand.isInitialized()){
-                        throw new GitletException("Not in an initialized Gitlet directory.");
-                    }
-                    if(args.length!=2){
-                        throw new GitletException("Incorrect operands.");
-                    }
+                    checkInitialized();
+                    validateNumArgs(args,2);
                     LogCommand.findCommand(args[1]);
                     break;
 
                 case "status":
-                    if(!InitCommand.isInitialized()){
-                        throw new GitletException("Not in an initialized Gitlet directory.");
-                    }
-                    if(args.length!=1){
-                        throw new GitletException("Incorrect operands.");
-                    }
+                    checkInitialized();
+                    validateNumArgs(args,1);
                     LogCommand.statusCommand();
                     break;
 
                 case "checkout":
-                    if(!InitCommand.isInitialized()){
-                        throw new GitletException("Not in an initialized Gitlet directory.");
-                    }
+                    checkInitialized();
                     if(args.length==3 && args[1].equals("--")){
                         CheckoutCommand.checkoutFile(args[2]);
                     }
@@ -101,36 +78,26 @@ public class Main {
                     break;
 
                 case "branch":
-                    if(args.length!=2){
-                        throw new GitletException("Incorrect operands.");
-                    }
+                    checkInitialized();
+                    validateNumArgs(args,2);
                     BranchCommand.branchCommand(args[1]);
                     break;
 
                 case "rm-branch":
-                    if(args.length!=2){
-                        throw new GitletException("Incorrect operands.");
-                    }
+                    checkInitialized();
+                    validateNumArgs(args,2);
                     BranchCommand.branchDeleting(args[1]);
                     break;
 
                 case "reset":
-                    if(!InitCommand.isInitialized()){
-                        throw new GitletException("Not in an initialized Gitlet directory.");
-                    }
-                    if(args.length!=2){
-                        throw new GitletException("Incorrect operands.");
-                    }
+                    checkInitialized();
+                    validateNumArgs(args,2);
                     ResetCommand.restCommand(args[1]);
                     break;
 
                 case "merge":
-                    if(!InitCommand.isInitialized()){
-                        throw new GitletException("Not in an initialized Gitlet directory.");
-                    }
-                    if(args.length!=2){
-                        throw new GitletException("Incorrect operands.");
-                    }
+                    checkInitialized();
+                    validateNumArgs(args,2);
                     MergeCommand.mergeCommand(args[1]);
                     break;
                 default:
@@ -139,6 +106,19 @@ public class Main {
         }catch (GitletException e){
             System.out.println(e.getMessage());
             System.exit(0);
+        }
+    }
+
+    // every command except init needs the .gitlet directory
+    private static void checkInitialized(){
+        if(!InitCommand.isInitialized()){
+            throw new GitletException("Not in an initialized Gitlet directory.");
+        }
+    }
+
+    private static void validateNumArgs(String[] args, int n){
+        if(args.length!=n){
+            throw new GitletException("Incorrect operands.");
         }
     }
 }

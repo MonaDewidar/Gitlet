@@ -45,7 +45,6 @@ public class RmTestCommand {
     // create a.txt -> rm it , removed from the stagingfiles , added to removed set, still in WD
     @Test
     public void creatingFilesWithoutCommitedThenDeleteIt(){
-        InitCommand.init();
         Utils.writeContents(Utils.join(Path.CWD,"a.txt"),"ManMonaa first file");
         AddCommand.addingFunction("a.txt");
         RmCommand.removeCommand("a.txt");
@@ -64,7 +63,6 @@ public class RmTestCommand {
     //Removing a committed file stages it for removal and deletes it from the working directory.
     @Test
     public void creatingFilesAfterCommitedThenDeleteIt(){
-        InitCommand.init();
         Utils.writeContents(Utils.join(Path.CWD,"a.txt"),"ManMonaa first file");
         AddCommand.addingFunction("a.txt");
         CommitCommand.addCommit("first commit");
@@ -85,7 +83,6 @@ public class RmTestCommand {
     //Removing a file that is neither staged nor tracked is refused and leaves the file alone.
     @Test(expected = GitletException.class)
     public void justCreateTheFile(){
-        InitCommand.init();
         Utils.writeContents(Utils.join(Path.CWD,"a.txt"),"ManMonaa first file");
         RmCommand.removeCommand("a.txt");
     }

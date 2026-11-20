@@ -9,6 +9,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 public class StagingArea implements Serializable {
+    private static final long serialVersionUID = 1L;
     // add
     // if there is no change ?
     // alphabetic sort
@@ -23,8 +24,9 @@ public class StagingArea implements Serializable {
      TreeSet<String>stagingRemove=new TreeSet<>();
 
     public void removingFiles(String fileName){
+            // a file can not be staged for addition and removal at the same time
+            stagingFiles.remove(fileName);
             stagingRemove.add(fileName);
-//            stagingFiles.remove(fileName); in case add a.txt then rm a.txt it does not commited yet
         }
 
 
@@ -58,7 +60,7 @@ public class StagingArea implements Serializable {
 
     // load
     public static StagingArea loadStagingContent(){
-       if(Path.STAGING_FILE.exists()){
+       if(Path.STAGING_FILE.isFile()){
            return Utils.readObject(Path.STAGING_FILE,StagingArea .class);
        }
        else {
