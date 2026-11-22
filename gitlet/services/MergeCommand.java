@@ -1,157 +1,173 @@
 package gitlet.services;
 
 import gitlet.GitletException;
-import gitlet.Utils;
-import gitlet.repository.*;
+import gitlet.repository.Blob;
+import gitlet.repository.Branch;
+import gitlet.repository.Commit;
+import gitlet.repository.StagingArea;
+import gitlet.repository.WorkingDirectory;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
+/** merge [branch name]: merges the given branch into the current branch. */
 public class MergeCommand {
-    public static void mergeCommand(String branchName){
-        String currentBranchName = Branch.readHead();
 
-        StagingArea stagingArea=StagingArea.loadStagingContent();
-        if(!(stagingArea.getStagingFiles().isEmpty() && stagingArea.getStagingRemove().isEmpty())){
+    public static void merge(String branchName) {
+        String currentBranch = Branch.readHead();
+        StagingArea stagingArea = StagingArea.load();
+
+        if (!stagingArea.isEmpty()) {
             throw new GitletException("You have uncommitted changes.");
         }
-        if(!(Utils.join(Path.Branch_DIR,branchName).isFile())){
+        if (!Branch.exists(branchName)) {
             throw new GitletException("A branch with that name does not exist.");
         }
-        if(currentBranchName.equals(branchName)){
+        if (branchName.equals(currentBranch)) {
             throw new GitletException("Cannot merge a branch with itself.");
         }
 
-        String givenBranchCommitId=Branch.readBranch(branchName);
-        String currentCommitId=Branch.readBranch(currentBranchName);
-        String splitPointCommitID=findSplitPoint(currentCommitId,givenBranchCommitId);
+        String currentCommitId = Branch.currentCommitId();
+        String givenCommitId = Branch.readBranch(branchName);
+        String splitPointId = findSplitPoint(currentCommitId, givenCommitId);
 
-        if(splitPointCommitID.equals(givenBranchCommitId)){
+        if (splitPointId.equals(givenCommitId)) {
             System.out.println("Given branch is an ancestor of the current branch.");
             return;
         }
-        if(splitPointCommitID.equals(currentCommitId)){
+        if (splitPointId.equals(currentCommitId)) {
             CheckoutCommand.checkoutBranch(branchName);
             System.out.println("Current branch fast-forwarded.");
             return;
         }
 
-        TreeMap<String,String> filesInGivenBranch=Commit.loadCommit(givenBranchCommitId).getBlobs();
-        TreeMap<String,String> filesInCurrentBranch=Commit.loadCommit(currentCommitId).getBlobs();
-        TreeMap<String,String> filesInSplitPoint=Commit.loadCommit(splitPointCommitID).getBlobs();
+        TreeMap<String, String> splitFiles = Commit.loadCommit(splitPointId).getBlobs();
+        TreeMap<String, String> currentFiles = Commit.loadCommit(currentCommitId).getBlobs();
+        TreeMap<String, String> givenFiles = Commit.loadCommit(givenCommitId).getBlobs();
 
-        Set<String>all=new TreeSet<>();
-        all.addAll(filesInSplitPoint.keySet());
-        all.addAll(filesInCurrentBranch.keySet());
-        all.addAll(filesInGivenBranch.keySet());
+        Set<String> allFiles = new TreeSet<>();
+        allFiles.addAll(splitFiles.keySet());
+        allFiles.addAll(currentFiles.keySet());
+        allFiles.addAll(givenFiles.keySet());
 
-        // first decide what happens to every file, so nothing is changed if the merge has to stop
-        TreeMap<String,String> toCheckout=new TreeMap<>();   // file -> blob id of the given branch
-        TreeSet<String> toRemove=new TreeSet<>();
-        TreeSet<String> conflicts=new TreeSet<>();
-        for(String file:all){
-            String splitID=filesInSplitPoint.get(file);
-            String currentID=filesInCurrentBranch.get(file);
-            String givenID=filesInGivenBranch.get(file);
+        // 1. Decide what happens to every file, without changing anything yet.
+        TreeMap<String, String> toCheckout = new TreeMap<>();  // file name -> blob id in the given branch
+        TreeSet<String> toRemove = new TreeSet<>();
+        TreeSet<String> conflicts = new TreeSet<>();
+        for (String fileName : allFiles) {
+            String splitId = splitFiles.get(fileName);
+            String currentId = currentFiles.get(fileName);
+            String givenId = givenFiles.get(fileName);
 
-            boolean currentModified=!Objects.equals(currentID,splitID);
-            boolean givenModified=!Objects.equals(givenID,splitID);
+            boolean changedInCurrent = !Objects.equals(currentId, splitId);
+            boolean changedInGiven = !Objects.equals(givenId, splitId);
 
-            // modified in the given branch only -> take the given version
-            if(givenModified && !currentModified){
-                if(givenID!=null) {
-                    toCheckout.put(file,givenID);
+            if (changedInGiven && !changedInCurrent) {
+                // Changed only in the given branch: take the given version (or its deletion).
+                if (givenId == null) {
+                    toRemove.add(fileName);
+                } else {
+                    toCheckout.put(fileName, givenId);
                 }
-                else {
-                    // the given branch deleted it
-                    toRemove.add(file);
-                }
+            } else if (changedInCurrent && changedInGiven && !Objects.equals(currentId, givenId)) {
+                // Changed in both branches in different ways.
+                conflicts.add(fileName);
             }
-            // modified in both branches, in different ways -> conflict
-            else if(currentModified && givenModified && !Objects.equals(givenID,currentID)){
-                conflicts.add(file);
-            }
-            // modified in the current branch only, or in the same way in both -> stays as it is
+            // Otherwise it changed only in the current branch, or the same way in both: keep it.
         }
 
-        // an untracked file in the current commit would be overwritten or deleted by the merge
-        for(String file:WorkingDirectory.loadFilesInWD()){
-            if(filesInCurrentBranch.containsKey(file)){
-                continue;
-            }
-            if(toCheckout.containsKey(file) || toRemove.contains(file) || conflicts.contains(file)){
-                throw new GitletException("There is an untracked file in the way; delete it, or add and commit it first.");
+        // 2. Stop if an untracked file would be overwritten or deleted.
+        for (String fileName : WorkingDirectory.listFiles()) {
+            boolean untracked = !currentFiles.containsKey(fileName);
+            boolean changedByMerge = toCheckout.containsKey(fileName)
+                    || toRemove.contains(fileName) || conflicts.contains(fileName);
+            if (untracked && changedByMerge) {
+                throw new GitletException(CheckoutCommand.UNTRACKED_FILE_ERROR);
             }
         }
 
-        for(Map.Entry<String,String> entry:toCheckout.entrySet()){
-            WorkingDirectory.writeBlobIntoWD(entry.getKey(),entry.getValue());
-            stagingArea.addingFiles(entry.getKey(),entry.getValue());
+        // 3. Apply the changes and stage them.
+        for (Map.Entry<String, String> entry : toCheckout.entrySet()) {
+            WorkingDirectory.restoreFile(entry.getKey(), entry.getValue());
+            stagingArea.stageForAddition(entry.getKey(), entry.getValue());
         }
-        for(String file:toRemove){
-            WorkingDirectory.deleteFilesFromWD(file);
-            stagingArea.removingFiles(file);
+        for (String fileName : toRemove) {
+            WorkingDirectory.deleteFile(fileName);
+            stagingArea.stageForRemoval(fileName);
         }
-        for(String file:conflicts){
-            String currentID=filesInCurrentBranch.get(file);
-            String givenID=filesInGivenBranch.get(file);
-            // a deleted file is treated as an empty file
-            String currentContent=(currentID==null)?"":Blob.readContent(currentID);
-            String givenContent=(givenID==null)?"":Blob.readContent(givenID);
-
-            String content = "<<<<<<< HEAD\n" + currentContent + "=======\n" + givenContent + ">>>>>>>\n";
-            WorkingDirectory.writeFilesIntoWD(file,content);
-            stagingArea.addingFiles(file,Blob.saveContent(content));
+        for (String fileName : conflicts) {
+            String content = conflictContent(currentFiles.get(fileName), givenFiles.get(fileName));
+            WorkingDirectory.writeFile(fileName, content);
+            stagingArea.stageForAddition(fileName, Blob.save(content));
         }
-        stagingArea.saveStagingContent();
+        stagingArea.save();
 
-        // the merge commit has 2 parents: the current branch head and the given branch head
-        CommitCommand.addCommit("Merged " + branchName + " into " + currentBranchName + ".", givenBranchCommitId);
+        // 4. The merge commit has two parents: the current head and the given branch's head.
+        CommitCommand.commit("Merged " + branchName + " into " + currentBranch + ".", givenCommitId);
 
-        if(!conflicts.isEmpty()){
+        if (!conflicts.isEmpty()) {
             System.out.println("Encountered a merge conflict.");
         }
     }
 
-    // the latest common ancestor of the 2 commits, following both parents of merge commits
-    static String findSplitPoint(String currentCommitId,String givenCommitId){
-        // all the ancestors of the given branch head (including itself)
-        Set<String> givenAncestors=new HashSet<>();
-        Deque<String> queue=new ArrayDeque<>();
-        queue.add(givenCommitId);
-        while(!queue.isEmpty()){
-            String id=queue.poll();
-            if(!givenAncestors.add(id)){
-                continue;
-            }
-            Commit commit=Commit.loadCommit(id);
-            if(commit.getParent()!=null){
-                queue.add(commit.getParent());
-            }
-            if(commit.getSecParent()!=null){
-                queue.add(commit.getSecParent());
-            }
-        }
+    /** The contents of a conflicted file. A deleted file counts as an empty file. */
+    private static String conflictContent(String currentBlobId, String givenBlobId) {
+        String currentContent = (currentBlobId == null) ? "" : Blob.readContent(currentBlobId);
+        String givenContent = (givenBlobId == null) ? "" : Blob.readContent(givenBlobId);
+        return "<<<<<<< HEAD\n" + currentContent + "=======\n" + givenContent + ">>>>>>>\n";
+    }
 
-        // BFS from the current branch head, the first common commit is the closest one
-        Set<String> visited=new HashSet<>();
-        queue.clear();
+    /**
+     * Returns the split point: the latest common ancestor of the two commits.
+     * Both parents of merge commits are followed.
+     */
+    static String findSplitPoint(String currentCommitId, String givenCommitId) {
+        Set<String> givenAncestors = ancestorsOf(givenCommitId);
+
+        // BFS from the current commit: the first common ancestor found is the closest one.
+        Set<String> visited = new HashSet<>();
+        Deque<String> queue = new ArrayDeque<>();
         queue.add(currentCommitId);
-        while(!queue.isEmpty()){
-            String id=queue.poll();
-            if(!visited.add(id)){
+        while (!queue.isEmpty()) {
+            String id = queue.poll();
+            if (!visited.add(id)) {
                 continue;
             }
-            if(givenAncestors.contains(id)){
+            if (givenAncestors.contains(id)) {
                 return id;
             }
-            Commit commit=Commit.loadCommit(id);
-            if(commit.getParent()!=null){
-                queue.add(commit.getParent());
-            }
-            if(commit.getSecParent()!=null){
-                queue.add(commit.getSecParent());
-            }
+            addParents(queue, id);
         }
         throw new GitletException("No split point found.");
+    }
+
+    /** Returns this commit and all its ancestors (BFS over both parents). */
+    private static Set<String> ancestorsOf(String commitId) {
+        Set<String> ancestors = new HashSet<>();
+        Deque<String> queue = new ArrayDeque<>();
+        queue.add(commitId);
+        while (!queue.isEmpty()) {
+            String id = queue.poll();
+            if (ancestors.add(id)) {
+                addParents(queue, id);
+            }
+        }
+        return ancestors;
+    }
+
+    private static void addParents(Deque<String> queue, String commitId) {
+        Commit commit = Commit.loadCommit(commitId);
+        if (commit.getParent() != null) {
+            queue.add(commit.getParent());
+        }
+        if (commit.getSecondParent() != null) {
+            queue.add(commit.getSecondParent());
+        }
     }
 }

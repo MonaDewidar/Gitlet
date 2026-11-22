@@ -6,27 +6,42 @@ import gitlet.Utils;
 import java.io.File;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.TreeMap;
 
-import static gitlet.Utils.sha1;
-
+/**
+ * A snapshot of the tracked files, saved in .gitlet/commits under its id.
+ * Parents are saved as ids, not as Commit objects, so saving a commit
+ * never saves the commits before it.
+ */
 public class Commit implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    // length of a full sha1 id
+
+    /** Length of a full SHA-1 id. */
     private static final int ID_LENGTH = 40;
 
     private final String message;
-    private final Date TimeStamp;
+    private final Date timestamp;
+
+    /** Id of the first parent, or null for the initial commit. */
     private final String parent;
-    private final String secParent;
+
+    /** Id of the second parent for a merge commit, or null for other commits. */
+    private final String secondParent;
+
+    /** File name -> blob id of every file tracked by this commit. */
     private final TreeMap<String, String> blobs;
 
-    public Commit(String message, Date TimeStamp, String parent, String secParent, TreeMap<String, String> blobs) {
+    public Commit(String message, Date timestamp, String parent, String secondParent,
+                  TreeMap<String, String> blobs) {
         this.message = message;
-        this.TimeStamp = TimeStamp;
+        this.timestamp = timestamp;
         this.parent = parent;
-        this.secParent = secParent;
+        this.secondParent = secondParent;
         this.blobs = blobs;
     }
 
@@ -34,102 +49,82 @@ public class Commit implements Serializable {
         return message;
     }
 
-    public Date getTimeStamp() {
-        return TimeStamp;
+    public Date getTimestamp() {
+        return timestamp;
     }
 
     public String getParent() {
         return parent;
     }
 
-    public String getSecParent() {
-        return secParent;
+    public String getSecondParent() {
+        return secondParent;
     }
 
     public TreeMap<String, String> getBlobs() {
         return blobs;
     }
 
-
-    // save
-    // write a file in .gitlet/commit
-    public String saveCommit(){
-        // first get the id of the commit
-        String id=sha1((Object) Utils.serialize(this));
-        // build file
-        File file=Utils.join(Path.COMMIT_DIR,id);
-        // write the commit in this file
-        Utils.writeObject(file,this);
+    /** Saves this commit and returns its id, the SHA-1 hash of the saved commit. */
+    public String saveCommit() {
+        String id = Utils.sha1((Object) Utils.serialize(this));
+        Utils.writeObject(Utils.join(Path.COMMIT_DIR, id), this);
         return id;
-
     }
 
-    @Override
-    public String toString() {
-        return "Commit{" +
-                "message='" + message + '\'' +
-                ", TimeStamp=" + TimeStamp +
-                ", parent='" + parent + '\'' +
-                ", secparent='" + secParent + '\'' +
-                ", blobs=" + blobs +
-                '}';
-    }
-
-    // the text for one commit in the log
-    public  String toLogString(String id) {
+    /** Returns how this commit, which has this id, is printed by log and global-log. */
+    public String toLogString(String id) {
         SimpleDateFormat format = new SimpleDateFormat("EEE MMM d HH:mm:ss yyyy Z", Locale.ENGLISH);
-        String result = "===\n";
-        result += "commit " + id + "\n";
-        if (secParent != null) {
-            // only for merge commits: first 7 characters of each parent
-            result += "Merge: " + parent.substring(0, 7) + " " + secParent.substring(0, 7) + "\n";
+        StringBuilder result = new StringBuilder();
+        result.append("===\n");
+        result.append("commit ").append(id).append("\n");
+        if (secondParent != null) {
+            // Only merge commits: the first 7 characters of each parent.
+            result.append("Merge: ").append(parent, 0, 7)
+                    .append(" ").append(secondParent, 0, 7).append("\n");
         }
-        result += "Date: " + format.format(TimeStamp) + "\n";
-        result += message + "\n";
-        return result;
+        result.append("Date: ").append(format.format(timestamp)).append("\n");
+        result.append(message).append("\n");
+        return result.toString();
     }
 
-
-    // load
-    public static Commit loadCommit(String id){
-        // get the commitFile with this id
-        if(id==null || id.isEmpty()){
+    /** Loads the commit with this full id. */
+    public static Commit loadCommit(String id) {
+        if (id == null || id.isEmpty()) {
             throw new GitletException("No commit with that id exists.");
         }
-        File file=Utils.join(Path.COMMIT_DIR,id);
-        if(!(file.isFile())) {
+        File file = Utils.join(Path.COMMIT_DIR, id);
+        if (!file.isFile()) {
             throw new GitletException("No commit with that id exists.");
         }
-        return Utils.readObject(file,Commit.class);
+        return Utils.readObject(file, Commit.class);
     }
 
-    // full id from a full or abbreviated id (less than 40 characters)
-    public static String findFullId(String idAp){
-        if(idAp==null || idAp.isEmpty() || idAp.length()>ID_LENGTH){
+    /** Returns the full id of a commit from its full or abbreviated id. */
+    public static String findFullId(String shortId) {
+        if (shortId == null || shortId.isEmpty() || shortId.length() > ID_LENGTH) {
             throw new GitletException("No commit with that id exists.");
         }
-        if(idAp.length()==ID_LENGTH){
-            if(Utils.join(Path.COMMIT_DIR,idAp).isFile()){
-                return idAp;
+        if (shortId.length() == ID_LENGTH) {
+            if (Utils.join(Path.COMMIT_DIR, shortId).isFile()) {
+                return shortId;
             }
             throw new GitletException("No commit with that id exists.");
         }
-        for(String id:listCommit()){
-            if(id.startsWith(idAp)){
+        for (String id : listCommitIds()) {
+            if (id.startsWith(shortId)) {
                 return id;
             }
         }
         throw new GitletException("No commit with that id exists.");
     }
 
-
-    // list
-
-    public static List<String> listCommit(){
-        List<String> all=Utils.plainFilenamesIn(Path.COMMIT_DIR);
-        if(all==null){
+    /** Returns the ids of all commits ever made. */
+    public static List<String> listCommitIds() {
+        List<String> ids = Utils.plainFilenamesIn(Path.COMMIT_DIR);
+        if (ids == null) {
             return new ArrayList<>();
         }
-        return all;
+        return ids;
     }
 }

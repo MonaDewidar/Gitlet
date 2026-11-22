@@ -1,29 +1,27 @@
 package gitlet.services;
 
 import gitlet.GitletException;
-import gitlet.Utils;
 import gitlet.repository.Branch;
-import gitlet.repository.Path;
 
+/** branch and rm-branch. */
 public class BranchCommand {
-    public static void branchCommand(String branchName){
-        if(Utils.join(Path.Branch_DIR,branchName).exists()){
+
+    /** branch [branch name]: creates a branch at the current commit. Does not switch to it. */
+    public static void createBranch(String branchName) {
+        if (Branch.exists(branchName)) {
             throw new GitletException("A branch with that name already exists.");
         }
-       String commitId=Branch.readBranch(Branch.readHead());
-        Branch.writeBranch(branchName,commitId);
-
+        Branch.writeBranch(branchName, Branch.currentCommitId());
     }
 
-    public static void branchDeleting(String branchName){
-        if(!(Utils.join(Path.Branch_DIR,branchName).isFile())){
+    /** rm-branch [branch name]: deletes the branch pointer only. Its commits are kept. */
+    public static void removeBranch(String branchName) {
+        if (!Branch.exists(branchName)) {
             throw new GitletException("A branch with that name does not exist.");
         }
-        String currentBranch=Branch.readHead();
-        if(currentBranch.equals(branchName)){
+        if (branchName.equals(Branch.readHead())) {
             throw new GitletException("Cannot remove the current branch.");
         }
-        Utils.join(Path.Branch_DIR,branchName).delete();
-
+        Branch.delete(branchName);
     }
 }

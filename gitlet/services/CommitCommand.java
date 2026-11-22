@@ -8,37 +8,42 @@ import gitlet.repository.StagingArea;
 import java.util.Date;
 import java.util.TreeMap;
 
+/** commit [message]: saves a snapshot of the tracked files and the staged changes. */
 public class CommitCommand {
 
-    public static void addCommit(String message){
-        addCommit(message, null);
+    public static void commit(String message) {
+        commit(message, null);
     }
 
-    // secondParent is null for a normal commit, and the given branch head for a merge commit
-    public static void addCommit(String message, String secondParent){
-        if(message==null || message.trim().isEmpty()){
+    /**
+     * Makes a new commit on the current branch.
+     * secondParent is the given branch's head for a merge commit, and null otherwise.
+     */
+    public static void commit(String message, String secondParent) {
+        if (message == null || message.trim().isEmpty()) {
             throw new GitletException("Please enter a commit message.");
         }
-        StagingArea stagingArea=StagingArea.loadStagingContent();
-        if(stagingArea.getStagingFiles().isEmpty() && stagingArea.getStagingRemove().isEmpty()){
+        StagingArea stagingArea = StagingArea.load();
+        if (stagingArea.isEmpty()) {
             throw new GitletException("No changes added to the commit.");
         }
 
-        String branch= Branch.readHead();
-        String commitId=Branch.readBranch(branch);
-        Commit currentCommit=Commit.loadCommit(commitId);
+        String branchName = Branch.readHead();
+        String parentId = Branch.readBranch(branchName);
+        Commit parent = Commit.loadCommit(parentId);
 
-        TreeMap<String,String> newBlobs = new TreeMap<>(currentCommit.getBlobs());
-        newBlobs.putAll(stagingArea.getStagingFiles());
-        for(String curr : stagingArea.getStagingRemove()){
-            newBlobs.remove(curr);
+        // Start from the parent's files, then apply the staged additions and removals.
+        TreeMap<String, String> blobs = new TreeMap<>(parent.getBlobs());
+        blobs.putAll(stagingArea.getStagedFiles());
+        for (String fileName : stagingArea.getRemovedFiles()) {
+            blobs.remove(fileName);
         }
 
-        Commit nextCommit = new Commit(message, new Date(), commitId, secondParent, newBlobs);
-        String id = nextCommit.saveCommit();
-        Branch.writeBranch(branch, id);
-        stagingArea.clear();
-        stagingArea.saveStagingContent();
-    }
+        Commit newCommit = new Commit(message, new Date(), parentId, secondParent, blobs);
+        String id = newCommit.saveCommit();
+        Branch.writeBranch(branchName, id);
 
+        stagingArea.clear();
+        stagingArea.save();
+    }
 }

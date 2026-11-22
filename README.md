@@ -144,9 +144,9 @@ gitlet/
     Path.java               locations inside .gitlet
   services/                 one class per command
     InitCommand.java  AddCommand.java  CommitCommand.java  RmCommand.java
-    LogCommand.java   CheckoutCommand.java  BranchCommand.java
-    ResetCommand.java  MergeCommand.java
-test/                       JUnit tests
+    LogCommand.java   StatusCommand.java  CheckoutCommand.java
+    BranchCommand.java  ResetCommand.java  MergeCommand.java
+test/                       JUnit tests (one *CommandTest class per command)
 testing/                    integration tests and tester
 gitlet-design.md            design document
 ```

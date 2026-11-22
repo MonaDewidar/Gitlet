@@ -1,41 +1,32 @@
 package gitlet.services;
 
 import gitlet.GitletException;
-import gitlet.Utils;
-import gitlet.repository.*;
+import gitlet.repository.Branch;
+import gitlet.repository.Commit;
+import gitlet.repository.StagingArea;
+import gitlet.repository.WorkingDirectory;
 
+/** rm [file name]: unstages a file, or stages it for removal if the current commit tracks it. */
 public class RmCommand {
-    public static void removeCommand(String fileName){
-        // if it is staged -> unstage it
-        StagingArea stagingArea=StagingArea.loadStagingContent();
-        // get the current commit
-        String branch= Branch.readHead();
-        String commitId=Branch.readBranch(branch);
-        Commit commit= Commit.loadCommit(commitId);
 
-        boolean staged=stagingArea.getStagingFiles().containsKey(fileName);
-        boolean tracked=commit.getBlobs().containsKey(fileName);
+    public static void remove(String fileName) {
+        StagingArea stagingArea = StagingArea.load();
+        Commit currentCommit = Commit.loadCommit(Branch.currentCommitId());
 
-
-        if(staged){
-            stagingArea.unstage(fileName);
-        }
-
-        if(tracked){
-            // add it in removal and remove it from WD so that next commit will not see it again
-            // no changes in the current commit , it is just a note for the next commit
-            stagingArea.removingFiles(fileName);
-            WorkingDirectory.deleteFilesFromWD(fileName);
-        }
-
-
-
-        if(!staged && !tracked){
+        boolean staged = stagingArea.getStagedFiles().containsKey(fileName);
+        boolean tracked = currentCommit.getBlobs().containsKey(fileName);
+        if (!staged && !tracked) {
             throw new GitletException("No reason to remove the file.");
         }
 
-        // save any changes in the stagingArea
-        stagingArea.saveStagingContent();
-
+        if (staged) {
+            stagingArea.unstage(fileName);
+        }
+        if (tracked) {
+            // The next commit will not track it. The current commit does not change.
+            stagingArea.stageForRemoval(fileName);
+            WorkingDirectory.deleteFile(fileName);
+        }
+        stagingArea.save();
     }
 }
