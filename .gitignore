@@ -17,7 +17,7 @@ gitlet/sentinel
 # integration tester output
 testing/*.dir/
 testing/__pycache__/
-
+testing
 # IDE settings
 .idea/
 *.iml
